@@ -11,6 +11,53 @@ install-podman () {
     fi
 }
 
+# Saved for reference, but not used
+<<COMMENTBLOCK
+setup-priv-ports () {
+    PRIV_PORT="${1}"
+    touch /etc/authbind/byport/${PRIV_PORT}
+    chown root:${DUSER} /etc/authbind/byport/${PRIV_PORT}
+    chmod 550 /etc/authbind/byport/${PRIV_PORT}
+}
+COMMENTBLOCK
+
+create-podman-systemd () {
+    SRV_FILE_LOC="/home/${DUSER}/.config/systemd/user"
+    SRV_FILE="podman-compose.service"
+    echo -e "\nGenerating ${SRV_FILE_LOC}/${SRV_FILE}"
+    mkdir -p "${SRV_FILE_LOC}"
+	tee "${SRV_FILE_LOC}/${SRV_FILE}" <<-EOF >/dev/null
+		[Unit]
+		Description=Podman via podman-compose
+		Wants=network-online.target
+		After=network-online.target
+		RequiresMountsFor=%t/containers
+		
+		[Service]
+		Environment=PODMAN_SYSTEMD_UNIT=%n
+		Environment=PODMAN_USERNS=keep-id
+		Restart=always
+		TimeoutStartSec=60
+		TimeoutStopSec=60
+		ExecStart=/usr/bin/podman-compose up --remove-orphans
+		ExecStop=/usr/bin/podman-compose stop
+		Type=simple
+		WorkingDirectory=%h
+		
+		[Install]
+		WantedBy=default.target
+
+	EOF
+
+    # Update ${SRV_FILE} permissions
+    chown -fR ${DUSER}:${DUSER} ${SRV_FILE_LOC}/${SRV_FILE}
+    chmod -fR 660 ${SRV_FILE_LOC}/${SRV_FILE}
+
+    # Create the service
+    sudo -i -u ${DUSER} systemctl --user daemon-reload
+    sudo -i -u ${DUSER} systemctl --user enable podman-compose
+}
+
 setup-podman-user () {
     # Setup podman registries
     mkdir -p "/home/${DUSER}/.conf/containers"
@@ -21,15 +68,6 @@ setup-podman-user () {
 
     # Allow ${DUSER} to keep containers running after logout
     loginctl enable-linger ${DUSER}
-}
 
-
-# Saved for reference, but not used
-<<COMMENTBLOCK
-setup-priv-ports () {
-    PRIV_PORT="${1}"
-    touch /etc/authbind/byport/${PRIV_PORT}
-    chown root:${DUSER} /etc/authbind/byport/${PRIV_PORT}
-    chmod 550 /etc/authbind/byport/${PRIV_PORT}
+    create-podman-systemd
 }
-COMMENTBLOCK
