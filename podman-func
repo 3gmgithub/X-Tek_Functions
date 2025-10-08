@@ -22,9 +22,17 @@ setup-podman-user () {
     loginctl enable-linger ${DUSER}
 }
 
+
+# Saved for reference, but not used
+<<COMMENTBLOCK
 setup-priv-ports () {
     PRIV_PORT="${1}"
     touch /etc/authbind/byport/${PRIV_PORT}
     chown root:${DUSER} /etc/authbind/byport/${PRIV_PORT}
     chmod 550 /etc/authbind/byport/${PRIV_PORT}
+}
+COMMENTBLOCK
+
+setup-priv-ports () {
+    setcap cap_net_bind_service=+ep /usr/libexec/podman/rootlessport
 }
