@@ -1,0 +1,24 @@
+#!/bin/bash
+
+setup-podman-user () {
+    # Setup podman registries
+    mkdir -p "/home/${DUSER}/.conf/containers"
+    echo "unqualified-search-registries = ${PODMAN_REG}" > "/home/${DUSER}/.conf/containers/registries.conf"
+
+    # Enable podman socket for ${DUSER}
+    sudo -i -u ${DUSER} systemctl --user enable podman.socket
+    sudo -i -u ${DUSER} systemctl --user start podman.socket
+    
+    # Allow ${DUSER} to keep containers running after logout
+    loginctl enable-linger ${DUSER}
+}
+
+install-podman () {
+    # Check for podman install
+    if [[ $(which podman) && $(podman --version) ]]; then
+            echo "Podman is already installed, skipping..."
+        else
+            echo "Podman is not installed, installing..."
+            apt install podman podman-compose podman-docker -y
+    fi
+}

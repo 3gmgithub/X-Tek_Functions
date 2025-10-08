@@ -1,0 +1,38 @@
+#!/bin/bash
+
+check-answer () {
+  if [ ${ANSWER,,} == "n" ]; then
+    read -p "Did you update the script file variables file (C)ontinue/(N)o? " ANSWER
+    if [ ${ANSWER,,} == "c" ]
+    then
+        echo "Ok continuing..."
+    else
+        echo "Stopping now..."
+        exit 0
+    fi
+  fi
+}
+
+create-duser () {
+    echo -e "\nCreating ${DUSER}"
+    useradd -m ${DUSER} -s /bin/bash
+    echo -n "${DUSER}:${DUSERPW}"|chpasswd
+
+    PUID=$(id -u ${DUSER})
+    PGID=$(id -g ${DUSER})
+
+    # Add user to docker group to manage docker containers
+    usermod -aG docker ${DUSER}
+
+    # Enable BYOBU for ${DUSER}
+    sudo -i -u ${DUSER} byobu-select-backend screen
+    sudo -i -u ${DUSER} byobu-enable-prompt
+    sudo -i -u ${DUSER} byobu-enable
+
+    # Update .bashrc with ll command and color
+    sed -i '/^#.*export GCC_COLORS/s/^#//' /home/${DUSER}/.bashrc
+
+    # \x27 is a quote in hex
+    sed -i 's,#alias ll=\x27ls -l\x27,alias ll=\x27ls -alh\x27,g' /home/${DUSER}/.bashrc
+}
+
