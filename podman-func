@@ -1,25 +1,22 @@
 #!/bin/bash
 
+setup-priv-ports () {
+    echo "net.ipv4.ip_unprivileged_port_start=80" > "/etc/sysctl.d/podman-privileged-ports.conf"
+    sysctl --load /etc/sysctl.d/podman-privileged-ports.conf
+}
+
+
 install-podman () {
     # Check for podman install
     if [[ $(which podman) && $(podman --version) ]]; then
             echo "Podman is already installed, skipping..."
         else
             echo "Podman is not installed, installing..."
-            apt install podman podman-compose podman-docker podman-remote podman-toolbox systemd-container -y
-            setcap cap_net_bind_service=+ep /usr/libexec/podman/rootlessport
+            apt install podman podman-compose podman-docker podman-remote podman-toolbox passt aardvark-dns systemd-container -y
+            setup-priv-ports
     fi
 }
 
-# Saved for reference, but not used
-<<COMMENTBLOCK
-setup-priv-ports () {
-    PRIV_PORT="${1}"
-    touch /etc/authbind/byport/${PRIV_PORT}
-    chown root:${DUSER} /etc/authbind/byport/${PRIV_PORT}
-    chmod 550 /etc/authbind/byport/${PRIV_PORT}
-}
-COMMENTBLOCK
 
 create-podman-systemd () {
     SRV_FILE_CONFIG="/home/${DUSER}/.config"
@@ -40,8 +37,8 @@ create-podman-systemd () {
 		Restart=always
 		TimeoutStartSec=60
 		TimeoutStopSec=60
-		ExecStart=/usr/bin/podman-compose up --remove-orphans
-		ExecStop=/usr/bin/podman-compose stop
+		ExecStart=/usr/bin/podman-compose up
+		ExecStop=/usr/bin/podman-compose down
 		Type=simple
 		WorkingDirectory=%h
 		
@@ -61,7 +58,7 @@ create-podman-systemd () {
 
 setup-podman-user () {
     # Setup podman registries
-    REGDIR_CONF="/home/${DUSER}/.conf"
+    REGDIR_CONF="/home/${DUSER}/.config"
     REGDIR_LOC="${REGDIR_CONF}/containers"
     REG_FILE="registries.conf"
     mkdir -p "${REGDIR_LOC}"
