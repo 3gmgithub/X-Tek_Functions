@@ -6,7 +6,7 @@ install-podman () {
             echo "Podman is already installed, skipping..."
         else
             echo "Podman is not installed, installing..."
-            apt install podman podman-compose podman-docker authbind -y
+            apt install podman podman-compose podman-docker -y
             setcap cap_net_bind_service=+ep /usr/libexec/podman/rootlessport
     fi
 }
