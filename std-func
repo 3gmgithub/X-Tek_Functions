@@ -21,8 +21,15 @@ create-duser () {
     PUID=$(id -u ${DUSER})
     PGID=$(id -g ${DUSER})
 
-    # Add user to docker group to manage docker containers
-    usermod -aG docker ${DUSER}
+    # Check for podman install
+    if [[ $(which podman) && $(podman --version) ]]; then
+            echo "Podman is installed, skipping add user to docker group..."
+
+        else
+            # Add user to docker group to manage docker containers
+            usermod -aG docker ${DUSER}
+    fi
+
 
     # Enable BYOBU for ${DUSER}
     sudo -i -u ${DUSER} byobu-select-backend screen
