@@ -6,7 +6,7 @@ install-podman () {
             echo "Podman is already installed, skipping..."
         else
             echo "Podman is not installed, installing..."
-            apt install podman podman-compose podman-docker -y
+            apt install podman podman-compose podman-docker systemd-container -y
             setcap cap_net_bind_service=+ep /usr/libexec/podman/rootlessport
     fi
 }
@@ -22,7 +22,8 @@ setup-priv-ports () {
 COMMENTBLOCK
 
 create-podman-systemd () {
-    SRV_FILE_LOC="/home/${DUSER}/.config/systemd/user"
+    SRV_FILE_CONFIG="/home/${DUSER}/.config"
+    SRV_FILE_LOC="${SRV_FILE_CONFIG}/systemd/user"
     SRV_FILE="podman-compose.service"
     echo -e "\nGenerating ${SRV_FILE_LOC}/${SRV_FILE}"
     mkdir -p "${SRV_FILE_LOC}"
@@ -49,22 +50,29 @@ create-podman-systemd () {
 
 	EOF
 
-    # Update ${SRV_FILE} permissions
-    chown -fR ${DUSER}:${DUSER} ${SRV_FILE_LOC}/${SRV_FILE}
-    chmod -fR 660 ${SRV_FILE_LOC}/${SRV_FILE}
+    # Fix user permissions for ${SRV_FILE_CONFIG}
+    chown -fR ${DUSER}:${DUSER} ${SRV_FILE_CONFIG}
+    chmod -fR 770 ${SRV_FILE_CONFIG}
 
     # Create the service
-    sudo -i -u ${DUSER} systemctl --user daemon-reload
-    sudo -i -u ${DUSER} systemctl --user enable podman-compose
+    machinectl shell --uid=${DUSER} .host $(which systemctl) --user daemon-reload
+    machinectl shell --uid=${DUSER} .host $(which systemctl) --user enable podman-compose
 }
 
 setup-podman-user () {
     # Setup podman registries
-    mkdir -p "/home/${DUSER}/.conf/containers"
-    echo "unqualified-search-registries = [${PODMAN_REG}]" > "/home/${DUSER}/.conf/containers/registries.conf"
+    REGDIR_CONF="/home/${DUSER}/.conf"
+    REGDIR_LOC="${REGDIR_CONF}/containers"
+    REG_FILE="registries.conf"
+    mkdir -p "${REGDIR_LOC}"
+    echo "unqualified-search-registries = [${PODMAN_REG}]" > "${REGDIR_LOC}/${REG_FILE}"
+
+    # Fix user permissions ${REGDIR_CONF}
+    chown -fR ${DUSER}:${DUSER} ${REGDIR_CONF}
+    chmod -fR 770 ${REGDIR_CONF}
 
     # Enable podman socket for ${DUSER}
-    sudo -i -u ${DUSER} systemctl --user enable --now podman.socket
+    machinectl shell --uid=${DUSER} .host $(which systemctl) --user enable --now podman.socket
 
     # Allow ${DUSER} to keep containers running after logout
     loginctl enable-linger ${DUSER}
