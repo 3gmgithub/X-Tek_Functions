@@ -43,3 +43,98 @@ create-duser () {
     sed -i 's,#alias ll=\x27ls -l\x27,alias ll=\x27ls -alh\x27,g' /home/${DUSER}/.bashrc
 }
 
+download-pfiles () {
+
+    # Define usage of function
+    dpf_usage () {
+			tee <<-EOF
+				Download private GITHUB files
+				Usage: $0 [OPTIONS]
+				    
+				Options:
+				    
+				    --help            Display this help message
+				    --git-owner       Put GIT owner here
+				    --git-repo        Put GIT repo here
+				    --git-path        Put GIT filepath here EX: src/main.py
+				    --git-token       Put GIT token here
+				    --download        Put download file and path EX: ./dest/main.py
+				    
+				Example:
+				
+				$0 --git-owner 'gitrepowner' --get-repo 'myrepo' --git-path 'src/main.py' --git-token 'github_pat_TOKEN' --download './dest/main.py'
+			EOF
+    }
+
+    # Get CMD Options
+
+    # *** Make sure you have a new enough getopt to handle long options (see the man page)
+    getopt -T &>/dev/null
+    if [[ $? -ne 4 ]]; then 
+        echo "Getopt is too old!" >&2
+        exit 1
+    fi
+
+    # Check if the number of arguments is 0
+    if [ $# -eq 0 ]; then
+        dpf_usage
+        exit 0
+    fi
+
+    # Set Options (-a also accepts short options)
+    OPTS=$(getopt -o '' -a --longoptions 'help,git-owner:,git-repo:,git-path:,git-token:,download:' -n "$0" -- "$@")
+    eval set -- "$OPTS"
+
+    if [ $? != 0 ] ; then
+        echo "Failed parsing options." >&2
+        exit
+    fi
+
+    while true; do
+      case "$1" in
+        --help)
+            dpf_usage
+            exit 0
+            shift
+            ;;
+        --git-owner)
+            GIT_OWNER=${2}
+            shift 2
+            ;;
+        --git-repo)
+            GIT_REPO=${2}
+            shift 2
+            ;;
+        --git-path)
+            GIT_PATH=${2}
+            shift 2
+            ;;
+        --git-token)
+            GIT_TOKEN=${2}
+            shift 2
+            ;;
+        --download)
+            DOWNLOAD=${2}
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo ""
+            echo "Error in given Parameters. Undefined: "
+            echo $*
+            echo ""
+            dpf_usage
+            exit 1
+      esac
+    done
+    
+    echo "Downloading \"${GIT_PATH}\" to \"${DOWNLOAD}\" "
+
+    # Download latest binary from Repo
+    curl -s -o "${DOWNLOAD}" "https://x-access-token:${GIT_TOKEN}@raw.githubusercontent.com/${GIT_OWNER}/${GIT_REPO}/main/${GIT_PATH}"
+
+}
+
