@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Just a base installation of the latest version, no settings are provided.
+
+install-netbird () {
+    curl -fsSL https://pkgs.netbird.io/install.sh | sh
+}

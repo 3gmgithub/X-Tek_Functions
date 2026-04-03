@@ -1,0 +1,12 @@
+#!/bin/bash
+
+remove-border0 () {
+
+    apt purge border0 -y
+
+    #service teleport stop
+    #systemctl daemon-reload
+    #rm -rf /var/lib/teleport
+    #rm -f /etc/teleport.yaml
+
+}

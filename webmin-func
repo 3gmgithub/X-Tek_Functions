@@ -1,0 +1,20 @@
+#!/bin/bash
+
+install-webmin () {
+
+    if ! command -v webmin &> /dev/null; then
+        echo "Webmin is not installed, installing..."
+
+        # Install Webmin
+        curl -o setup-repos.sh https://raw.githubusercontent.com/webmin/webmin/master/setup-repos.sh
+        echo y | bash ./setup-repos.sh
+        apt update -y
+        apt install webmin -y
+
+        # Cleanup
+        mv ./setup-repos.sh ./delete
+    else
+        echo "Webmin is already installed, skipping..."
+    fi
+
+}

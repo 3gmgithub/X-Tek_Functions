@@ -1,0 +1,19 @@
+#!/bin/bash
+
+remove-teleport () {
+
+    if [ ${OS_INSTALLER} == 'apt' ]; then
+        apt purge teleport -y
+    elif [ ${OS_INSTALLER} == 'yum' ]; then
+        yum remove teleport -y
+    else
+        echo "Cannot determine OS, not removing Teleport..."
+        return
+    fi
+
+    service teleport stop
+    systemctl daemon-reload
+    rm -rf /var/lib/teleport
+    rm -f /etc/teleport.yaml
+
+}
