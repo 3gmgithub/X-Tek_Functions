@@ -237,7 +237,7 @@ update-config () {
     # overwrite the positional parameters ($1, $2, etc.) with the parsed output
     eval set -- "$parsed_args"
 
-    Loop through the parameters
+    # Loop through the parameters
     while true; do
         case "$1" in
             -f|--file)
@@ -264,13 +264,14 @@ update-config () {
         esac
     done
 
-    Validate that all required arguments were provided
+    # Validate that all required arguments were provided
     if [[ -z "${FILE}" || -z "${KEY}" || -z "${VALUE}" ]]; then
         echo "Error: Missing required arguments." >&2
         echo "Usage: update-config --file <file_path> --key <config_key> --value <value>" >&2
         return 1
     fi
 
+    # Update key and value
     if grep -q "^${KEY}" "${FILE}"; then
         sed -i "s/^${KEY}.*/${KEY}${VALUE}/" "${FILE}"
     else
