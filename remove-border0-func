@@ -1,12 +1,11 @@
 #!/bin/bash
 
 remove-border0 () {
-
+    echo y | border0 connector uninstall
     apt purge border0 -y
-
-    #service teleport stop
-    #systemctl daemon-reload
-    #rm -rf /var/lib/teleport
-    #rm -f /etc/teleport.yaml
-
+    rm $(which border0)
+    rm -r /etc/border0
+    systemctl disable --now webmin-login-proxy
+    rm -r /etc/webmin-border0-proxy
+    rm -r /usr/share/webmin-border0-proxy
 }
