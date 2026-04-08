@@ -2,6 +2,18 @@
 
 remove-teleport () {
 
+    # Determine OS
+    if command -v apt > /dev/null; then
+        OS_INSTALLER="apt"
+    elif command -v yum > /dev/null; then
+        OS_INSTALLER="yum"
+    else
+        OS_INSTALLER="unknown"
+        echo "apt or yum do not exist..."
+        echo "Cannot determine OS, exiting..."
+        exit 1
+    fi
+
     if [ ${OS_INSTALLER} == 'apt' ]; then
         apt purge teleport -y
     elif [ ${OS_INSTALLER} == 'yum' ]; then
