@@ -3,9 +3,9 @@
 remove-teleport () {
 
     # Determine OS
-    if command -v apt > /dev/null; then
+    if [ command -v apt > /dev/null ]; then
         OS_INSTALLER="apt"
-    elif command -v yum > /dev/null; then
+    elif [ command -v yum > /dev/null ]; then
         OS_INSTALLER="yum"
     else
         OS_INSTALLER="unknown"
