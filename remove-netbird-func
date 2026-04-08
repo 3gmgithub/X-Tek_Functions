@@ -1,0 +1,5 @@
+#!/bin/bash
+netbird service uninstall
+rm $(which netbird)
+rm -rf /var/lib/netbird
+apt remove netbird -y
