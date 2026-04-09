@@ -6,4 +6,5 @@ remove-teleport () {
     systemctl daemon-reload
     rm -rf /var/lib/teleport
     rm -f /etc/teleport.yaml
+    rm -f /etc/apt/sources.list.d/teleport.list
 }
