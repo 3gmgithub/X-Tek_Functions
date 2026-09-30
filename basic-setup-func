@@ -1,0 +1,64 @@
+#!/bin/bash
+
+## Change this to something other than 'n' to remove the prompt
+ANSWER=n
+
+# Config docker user
+DUSER="PUTUSERHERE"
+
+LANG="en_US"
+TZ="America/Chicago"
+
+#*********************************************************************#
+#   Most everyone will not need to modify anything below this point   #
+#*********************************************************************#
+
+# Docker User Password 
+DUSERPW="$(openssl rand -base64 128 | grep -o '[[:alnum:]]' | tr -d '\n' | head -c${1:-16})"
+
+# Get Script DIR
+SCRIPT_DIR="$(dirname "$(realpath "$0")")"
+SCRIPT_NAME="$(basename "$0")"
+
+# GIT VARS
+GIT_USER="3gmgithub"
+GIT_REPO="X-Tek_Functions"
+
+#***********************************#
+#   DO NOT CHANGE BELOW THIS LINE   #
+#***********************************#
+
+download-lib () {
+    LIB_NAME="${1}"
+    
+    # Download
+    wget -O "${SCRIPT_DIR}/${LIB_NAME}" "https://raw.githubusercontent.com/${GIT_USER}/${GIT_REPO}/refs/heads/main/${LIB_NAME}"
+
+    # Add to source
+    source "${SCRIPT_DIR}/${LIB_NAME}"
+}
+
+# Get functions from GIT
+download-lib "docker-func"
+download-lib "std-func"
+download-lib "netbird-func"
+
+# Default setup
+defaults
+
+# Run check-answer
+check-answer
+
+# Install docker
+install-docker
+
+# Install netbird
+install-netbird
+
+# Create docker user
+create-duser
+
+# Messages
+
+# Show password for records
+echo -e "\nMake sure to record ${DUSER} password: ${DUSERPW}"

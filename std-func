@@ -13,6 +13,31 @@ check-answer () {
   fi
 }
 
+function defaults () {
+    apt update -y
+    apt dist-upgrade -y
+    apt autoremove -y
+    apt install apt-show-versions apt-transport-https byobu curl ncdu fzf gnupg gnupg1 gnupg2 jq libauthen-pam-perl libio-pty-perl libnet-ssleay-perl libpam-runtime openssl micro p7zip-full perl python3 screen shared-mime-info ssh unzip -y
+
+    # Setup byobu
+    if ps -ef | grep '[b]yobu' > /dev/null; then
+        echo "byobu is running, no need to install"
+    else
+        byobu-enable
+        byobu-select-backend screen
+        byobu-enable-prompt
+        source ~/.bashrc
+    fi
+
+    # Update .bashrc with ll command
+    sed -i 's/^# export LS_OPTIONS/export LS_OPTIONS/' ~/.bashrc
+    sed -i 's/^# eval "$(dircolors)"/eval "$(dircolors)"/' ~/.bashrc
+
+    # \x27 is a quote in hex
+    sed -i 's,# alias ll=\x27ls $LS_OPTIONS -l\x27,alias ll=\x27ls $LS_OPTIONS -alh\x27,g' ~/.bashrc
+    source ~/.bashrc
+}
+
 create-duser () {
     echo -e "\nCreating ${DUSER}"
     useradd -m ${DUSER} -s /bin/bash
