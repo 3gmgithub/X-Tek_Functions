@@ -13,11 +13,11 @@ check-answer () {
   fi
 }
 
-function defaults () {
+defaults () {
     apt update -y
     apt dist-upgrade -y
     apt autoremove -y
-    apt install apt-show-versions apt-transport-https byobu curl ncdu fzf gnupg gnupg1 gnupg2 jq libauthen-pam-perl libio-pty-perl libnet-ssleay-perl libpam-runtime openssl micro p7zip-full perl python3 screen shared-mime-info ssh unzip -y
+    apt install apt-show-versions apt-transport-https byobu curl ncdu fzf gnupg gnupg1 gnupg2 jq libauthen-pam-perl libio-pty-perl libnet-ssleay-perl libpam-runtime openssl micro p7zip-full perl python3 screen shared-mime-info ssh sudo unzip -y
 
     # Setup byobu
     if ps -ef | grep '[b]yobu' > /dev/null; then
