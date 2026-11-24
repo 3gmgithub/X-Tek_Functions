@@ -41,7 +41,7 @@ download-lib "std-func"
 check-answer
 
 # Install defaults
-defaults
+# defaults
 
 # Install packages
 declare -a my_packages=(
