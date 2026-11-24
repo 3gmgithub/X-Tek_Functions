@@ -18,7 +18,7 @@ SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 SCRIPT_NAME="$(basename "$0")"
 
 # GIT VARS
-GIT_USER="3gmgithub"
+GIT_OWNER="3gmgithub"
 GIT_REPO="X-Tek_Functions"
 
 #***********************************#
