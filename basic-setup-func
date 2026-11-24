@@ -44,12 +44,12 @@ check-answer
 defaults
 
 # Install packages
-declare -a my-packages=(
+declare -a my_packages=(
     "argon2"
     "mariadb-client-compat"
 )
 
-install-packages "${my-packages[@]}"
+install-packages "${my_packages[@]}"
 
 # Install docker
 install-docker
