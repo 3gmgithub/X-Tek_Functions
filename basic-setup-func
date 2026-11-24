@@ -6,9 +6,6 @@ ANSWER=n
 # Config docker user
 DUSER="PUTUSERHERE"
 
-LANG="en_US"
-TZ="America/Chicago"
-
 #*********************************************************************#
 #   Most everyone will not need to modify anything below this point   #
 #*********************************************************************#
@@ -21,7 +18,7 @@ SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 SCRIPT_NAME="$(basename "$0")"
 
 # GIT VARS
-GIT_USER="3gmgithub"
+GIT_OWNER="3gmgithub"
 GIT_REPO="X-Tek_Functions"
 
 #***********************************#
@@ -32,30 +29,32 @@ download-lib () {
     LIB_NAME="${1}"
     
     # Download
-    wget -O "${SCRIPT_DIR}/${LIB_NAME}" "https://raw.githubusercontent.com/${GIT_USER}/${GIT_REPO}/refs/heads/main/${LIB_NAME}"
-
-    # Add to source
-    source "${SCRIPT_DIR}/${LIB_NAME}"
+    echo "Downloading and adding ${LIB_NAME} to source..."
+    source <(curl -sSL "https://raw.githubusercontent.com/${GIT_OWNER}/${GIT_REPO}/refs/heads/main/${LIB_NAME}")
 }
 
 # Get functions from GIT
 download-lib "docker-func"
 download-lib "std-func"
-download-lib "netbird-func"
-
-# Default setup
-defaults
 
 # Run check-answer
 check-answer
 
+# Install defaults
+defaults
+
+# Install packages
+declare -a my-packages=(
+    "argon2"
+    "mariadb-client-compat"
+)
+
+install-packages "${my-packages[@]}"
+
 # Install docker
 install-docker
 
-# Install netbird
-install-netbird
-
-# Create docker user
+# Create Docker user
 create-duser
 
 # Messages

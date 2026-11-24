@@ -1,5 +1,33 @@
 #!/bin/bash
 
+declare -a default-packages=(
+  "apt-show-versions"
+  "apt-transport-https"
+  "btop"
+  "byobu"
+  "curl"
+  "fzf"
+  "gdu"
+  "gnupg"
+  "gnupg1"
+  "gnupg2"
+  "jq"
+  "libauthen-pam-perl"
+  "libio-pty-perl"
+  "libnet-ssleay-perl"
+  "libpam-runtime"
+  "micro"
+  "openssl"
+  "p7zip-full"
+  "perl"
+  "python3"
+  "screen"
+  "shared-mime-info"
+  "ssh"
+  "sudo"
+  "unzip"
+)
+
 check-answer () {
   if [ ${ANSWER,,} == "n" ]; then
     read -p "Did you update the script file variables file (C)ontinue/(N)o? " ANSWER
@@ -13,11 +41,38 @@ check-answer () {
   fi
 }
 
+install-packages () {
+    local packages=("$@")
+    local updated=false
+
+    for pkg in "${packages[@]}"; do
+        printf "Checking: %s - " "$pkg"
+
+        # Check if the package is already installed
+        if dpkg-query -W -f='${Status}' "$pkg" 2>/dev/null | grep -q "install ok installed"; then
+            echo "OK"
+        else
+            # Run apt-get update once if we need to install anything
+            if [ "$updated" = false ]; then
+                sudo apt-get update -qq &>/dev/null
+                updated=true
+            fi
+
+            # Install without confirmation or interactive prompts
+            if sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "$pkg" &>/dev/null; then
+                echo "OK"
+            else
+                echo "Failed"
+            fi
+        fi
+    done
+}
+
 defaults () {
     apt update -y
     apt dist-upgrade -y
     apt autoremove -y
-    apt install apt-show-versions apt-transport-https byobu curl ncdu fzf gnupg gnupg1 gnupg2 jq libauthen-pam-perl libio-pty-perl libnet-ssleay-perl libpam-runtime openssl micro p7zip-full perl python3 screen shared-mime-info ssh sudo unzip -y
+    install-packages "${default-packages[@]}"
 
     # Setup byobu
     if ps -ef | grep '[b]yobu' > /dev/null; then
