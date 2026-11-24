@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -a default_packages=(
+default_packages=(
   "apt-show-versions"
   "apt-transport-https"
   "btop"
