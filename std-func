@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -a default-packages=(
+declare -a default_packages=(
   "apt-show-versions"
   "apt-transport-https"
   "btop"
@@ -72,7 +72,7 @@ defaults () {
     apt update -y
     apt dist-upgrade -y
     apt autoremove -y
-    install-packages "${default-packages[@]}"
+    install-packages "${default_packages[@]}"
 
     # Setup byobu
     if ps -ef | grep '[b]yobu' > /dev/null; then
